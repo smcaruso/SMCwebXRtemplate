@@ -71,31 +71,34 @@ class WebXRApp {
         let pawn = this.VRPawn;
         
         if (this.VRPawn != null && this.renderer.xr.isPresenting) {
+            console.log(this.scene)
             Object.values(pawn.MotionControllers).forEach(
                 function(controller) {
                     controller.updateFromGamepad();
                     pawn.UpdateControllerModel(controller);
                     let model = pawn.PawnRoot.getObjectByName(controller.name);
                     if (model != undefined) {
-                        model.setRotationFromEuler(controller.xrController.rotation);
+                        let controllerRotationQuat = new THREE.Quaternion();
+                        controller.xrController.getWorldQuaternion(controllerRotationQuat);
+                        model.setRotationFromQuaternion(controllerRotationQuat.normalize());
                         model.position.set(controller.xrController.position.x, controller.xrController.position.y, controller.xrController.position.z);
                     }
                 }
-            );
+                );
+                this.VRPawn.TraceFromController(this.VRPawn.RightController);
+                this.VRPawn.TraceFromController(this.VRPawn.LeftController);
+    
+                let NavIntersects = this.VRPawn.LeftController.raycaster.intersectObject(this.scene, true);
+                if (NavIntersects.length > 0) {
+                    this.VRPawn.MoveTarget.position.set(NavIntersects[0].point.x,NavIntersects[0].point.y,NavIntersects[0].point.z);
+                    this.VRPawn.MoveTarget.visible = true;
+                } else {
+                    this.VRPawn.MoveTarget.visible = false;
+                }
         }
 
         // if (this.renderer.xr.isPresenting) {
             
-        //     this.VRPawn.TraceFromController(this.VRPawn.RightController);
-        //     this.VRPawn.TraceFromController(this.VRPawn.LeftController);
-
-        //     let NavIntersects = this.VRPawn.LeftController.raycaster.intersectObject(this.scene, true);
-        //     if (NavIntersects.length > 0) {
-        //         this.VRPawn.MoveTarget.position.set(NavIntersects[0].point.x,NavIntersects[0].point.y, NavIntersects[0].point.z);
-        //         this.VRPawn.MoveTarget.visible = true;
-        //     } else {
-        //         this.VRPawn.MoveTarget.visible = false;
-        //     }
         // }
         
     }

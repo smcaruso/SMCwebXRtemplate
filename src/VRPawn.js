@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { XRControllerModelFactory } from "three/examples/jsm/webxr/XRControllerModelFactory.js"
+import { XRControllerModelFactory } from "./XRControllerModelFactory.js"
 import { fetchProfile, MotionController } from "@webxr-input-profiles/motion-controllers"
 
 class VRPawn {
@@ -14,7 +14,7 @@ class VRPawn {
         this.PawnRoot.add(app.ViewportCamera);
 
         this.MovementSpeed = 0;
-        // this.SetupVRControllers();
+        this.SetupVRControllers();
 
         this.XRSession.addEventListener("inputsourceschange", OnInputSourcesChange.bind(this));
 
@@ -161,28 +161,28 @@ class VRPawn {
 
     BuildController(index, line, modelFactory){
         
-        // const controller = this.app.renderer.xr.getController(index);
+        const controller = this.app.renderer.xr.getController(index);
         
-        // controller.userData.selectPressed = false;
-        // controller.userData.index = index;
+        controller.userData.selectPressed = false;
+        controller.userData.index = index;
         
-        // if (line) controller.add(line.clone());
+        if (line) controller.add(line.clone());
         
-        // this.CameraDolly.add(controller);
+        this.PawnRoot.add(controller);
         
-        // let grip;
+        let grip;
         
-        // if ( modelFactory ){
-        //     grip = this.app.renderer.xr.getControllerGrip( index );
-        //     grip.add(this.ControllerModelFactory.createControllerModel( grip ));
-        //     this.CameraDolly.add( grip );
-        // }
+        if ( modelFactory ){
+            grip = this.app.renderer.xr.getControllerGrip( index );
+            grip.add(this.ControllerModelFactory.createControllerModel( grip ));
+            this.PawnRoot.add( grip );
+        }
 
-        // const TracingMatrix = new THREE.Matrix4();
-        // const raycaster = new THREE.Raycaster();
-        // raycaster.layers.set(3);
+        const TracingMatrix = new THREE.Matrix4();
+        const raycaster = new THREE.Raycaster();
+        raycaster.layers.set(3);
         
-        // return {controller, grip, TracingMatrix, raycaster};
+        return {controller, grip, TracingMatrix, raycaster};
     
     }
 

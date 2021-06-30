@@ -1,4 +1,9 @@
-import { VRPawn } from "./VRPawn";
+import { VRPawn } from "./VRPawn"; // app-specific WebXR movement class
+
+/*
+Changes from main three.js repo replace default CSS styling with app & site-specific styles.
+- SMC 6/2021
+*/
 
 class VRButton {
 
