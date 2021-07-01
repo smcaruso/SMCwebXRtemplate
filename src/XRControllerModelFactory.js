@@ -18,7 +18,7 @@ import {
 	- SMC 6/2021
 */
 
-const DEFAULT_PROFILES_PATH = './profiles';
+const DEFAULT_PROFILES_PATH = './profiles'; // LOCAL RELATIVE PATH
 const DEFAULT_PROFILE = 'generic-trigger';
 
 class XRControllerModel extends Object3D {
@@ -219,9 +219,8 @@ class XRControllerModelFactory {
 
 		// If a GLTFLoader wasn't supplied to the constructor create a new one.
 		if ( ! this.gltfLoader ) {
-
 			this.gltfLoader = new GLTFLoader();
-
+			console.log("Wasting memory!");
 		}
 
 	}
@@ -244,13 +243,11 @@ class XRControllerModelFactory {
 					profile,
 					assetPath
 				);
-
 				const cachedAsset = this._assetCache[ controllerModel.motionController.assetUrl ];
 				if ( cachedAsset ) {
 
 					scene = cachedAsset.scene.clone();
-
-					addAssetSceneToControllerModel( controllerModel, scene );
+					addAssetSceneToControllerModel(controllerModel, scene);
 
 				} else {
 
@@ -266,9 +263,8 @@ class XRControllerModelFactory {
 						this._assetCache[ controllerModel.motionController.assetUrl ] = asset;
 
 						scene = asset.scene.clone();
-
 						addAssetSceneToControllerModel( controllerModel, scene );
-
+						
 					},
 					null,
 					() => {
