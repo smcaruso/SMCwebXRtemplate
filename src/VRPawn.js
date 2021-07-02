@@ -10,6 +10,8 @@ class VRPawn {
 
         this.PawnRoot = new THREE.Object3D();
         this.PawnRoot.name = "Pawn Root Camera Rig";
+        this.PawnRoot.translateX(app.ViewportCamera.position.x);
+        this.PawnRoot.translateZ(app.ViewportCamera.position.z);
         this.PawnRoot.add(app.ViewportCamera);
         
         this.Controllers = [];
@@ -73,7 +75,7 @@ class VRPawn {
         this.ControllerModelFactory = new XRControllerModelFactory(this);
     
         const LineGeo = new THREE.BufferGeometry().setFromPoints(
-            [ new THREE.Vector3( 0,0,0 ), new THREE.Vector3( 0,0,-1 ) ]
+            [ new THREE.Vector3( 0,0,0 ), new THREE.Vector3( 0,-0.5, -1 ) ]
         );
     
         const LineMat = new THREE.LineBasicMaterial({
@@ -82,7 +84,7 @@ class VRPawn {
         });
     
         const line = new THREE.Line(LineGeo, LineMat);
-        line.scale.z = 10;
+        line.scale.z = 1;
 
         this.Controllers.push(this.BuildController(0, line), this.BuildController(1, line));
 
@@ -102,7 +104,7 @@ class VRPawn {
         this.MoveTarget.material.blending = THREE.AdditiveBlending;
         this.MoveTarget.name = "Teleport movement target";
         this.MoveTarget.visible = false;
-        this.PawnRoot.add(this.MoveTarget);
+        this.PawnRoot.attach(this.MoveTarget);
 
     }
 
@@ -132,14 +134,18 @@ class VRPawn {
         return {controller, grip, TracingMatrix, raycaster};
     
     }
-
+    
     TraceFromController(MotionController) {
 
         MotionController.TracingMatrix.identity().extractRotation(MotionController.controller.matrixWorld);
+
+        let LinePos = new THREE.Vector3();
+        this.PawnRoot.localToWorld(LinePos)
+        LinePos.y -= 0.5;
+        LinePos.z -= 1;
     
         MotionController.raycaster.ray.origin.setFromMatrixPosition(MotionController.controller.matrixWorld);
-        MotionController.raycaster.ray.direction.set( 0, 0, - 1 ).applyMatrix4(MotionController.TracingMatrix);
-    
+        MotionController.raycaster.ray.direction.set(0, -0.5, -1).applyMatrix4(MotionController.TracingMatrix);
     }
 
     CheckControllerInputs() {
@@ -180,7 +186,7 @@ class VRPawn {
                 this.GamepadValues.RStickXAxis = InputSources[this.RIndex].gamepad.axes[RightMapValues[index]];
             }
             if (RightMapKeys[index].includes("yAxis")) {
-                this.GamepadValues.RStickYAxis = InputSources[this.RIndex].gamepad.axes[RightMapValues[index]];
+                this.GamepadValues.RStickYAxis = InputSources[this.RIndex].gamepad.axes[RightMapValues[index]] * -1;
             }
 
         } // RIGHT LOOP END
@@ -212,7 +218,7 @@ class VRPawn {
                     this.GamepadValues.LStickXAxis = InputSources[this.LIndex].gamepad.axes[LeftMapValues[index]];
                 }
                 if (LeftMapKeys[index].includes("yAxis")) {
-                    this.GamepadValues.LStickYAxis = InputSources[this.LIndex].gamepad.axes[LeftMapValues[index]];
+                    this.GamepadValues.LStickYAxis = InputSources[this.LIndex].gamepad.axes[LeftMapValues[index]] * -1;
                 }
     
             } // LEFT LOOP END
@@ -226,6 +232,186 @@ class VRPawn {
         if (this.InputCache.length > 2) this.InputCache.pop();
 
         return this.InputCache;
+
+    }
+
+    PressButton(input) {
+
+        switch (input) {
+
+            case "A":
+                // console.log("A pressed");
+                break;
+
+            case "ATouch":
+                // console.log("A touched");
+                break;
+
+            case "B":
+                // console.log("B pressed");
+                break;
+
+            case "BTouch":
+                // console.log("B touched");
+                break;
+
+            case "X":
+                // console.log("X pressed");
+                break;
+
+            case "XTouch":
+                // console.log("X touched");
+                break;
+
+            case "Y":
+                // console.log("Y pressed");
+                break;
+
+            case "YTouch":
+                // console.log("Y touched");
+                break;
+
+            case "RTrigger":
+                // console.log("Right trigger pressed");
+                break;
+
+            case "RGrip":
+                // console.log("Right grip pressed");
+                break;
+
+            case "RStick":
+                // console.log("Right stick pressed");
+                break;
+
+            case "RStickTouch":
+                // console.log("Right stick touched");
+                break;
+
+            case "LTrigger":
+                // console.log("Left trigger pressed");
+                break;
+
+            case "LGrip":
+                // console.log("Left grip pressed");
+                break;
+
+            case "LStick":
+                // console.log("Left stick pressed");
+                break;
+
+            case "LStickTouch":
+                // console.log("Left stick touched");
+                break;
+
+        }
+
+    }
+
+    ReleaseButton(input) {
+
+        switch (input) {
+
+            case "A":
+                // console.log("A released");
+                break;
+
+            case "ATouch":
+                // console.log("A untouched");
+                break;
+
+            case "B":
+                // console.log("B released");
+                break;
+
+            case "BTouch":
+                // console.log("B untouched");
+                break;
+
+            case "X":
+                // console.log("X released");
+                break;
+
+            case "XTouch":
+                // console.log("X untouched");
+                break;
+
+            case "Y":
+                // console.log("Y released");
+                break;
+
+            case "YTouch":
+                // console.log("Y untouched");
+                break;
+
+            case "RTrigger":
+                // console.log("Right trigger released");
+                break;
+
+            case "RGrip":
+                // console.log("Right grip released");
+                break;
+
+            case "RStick":
+                // console.log("Right stick released");
+                break;
+
+            case "RStickTouch":
+                // console.log("Right stick untouched");
+                break;
+
+            case "LTrigger":
+                // console.log("Left trigger released");
+                break;
+
+            case "LGrip":
+                // console.log("Left grip released");
+                break;
+
+            case "LStick":
+                // console.log("Left stick released");
+                break;
+
+            case "LStickTouch":
+                // console.log("Left stick untouched");
+                break;
+
+        }
+
+    }
+
+    AxisChange(input, InputCache) {
+
+        switch (input) {
+
+            case "RTriggerAxis":
+                break;
+
+            case "RGripAxis":
+                break;
+
+            case "RStickXAxis":
+                if (this.GamepadValues.RStickXAxis > 0.9 && InputCache[1][input] < 0.9) {
+                    this.PawnRoot.rotateY(-Math.PI * 0.25);
+                } else if (this.GamepadValues.RStickXAxis < -0.9 && InputCache[1][input] > -0.9) {
+                    this.PawnRoot.rotateY(Math.PI * 0.25);
+                } else break;
+
+            case "RStickYAxis":
+                break;
+
+            case "LTriggerAxis":
+                break;
+
+            case "LGripAxis":
+                break;
+
+            case "LStickXAxis": 
+                break;
+
+            case "LStickYAxis":
+                break;
+
+        }
 
     }
 

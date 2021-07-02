@@ -76,10 +76,10 @@ class WebXRApp {
             pawn.TraceFromController(pawn.LeftController);
 
             let NavIntersects = pawn.LeftController.raycaster.intersectObject(this.scene, true);
-            if (NavIntersects.length > 0) {
+            if (NavIntersects.length > 0 && pawn.GamepadValues.LStickYAxis > 0) {
                 pawn.MoveTarget.position.set(NavIntersects[0].point.x,NavIntersects[0].point.y,NavIntersects[0].point.z);
                 pawn.MoveTarget.visible = true;
-                pawn.MoveTarget.material.opacity = pawn.GamepadValues.LGripAxis;
+                pawn.MoveTarget.material.opacity = pawn.GamepadValues.LStickYAxis;
             } else {
                 pawn.MoveTarget.visible = false;
             }
@@ -97,17 +97,18 @@ class WebXRApp {
                         && InputValues[0][input] != pawn.GamepadDefaults[input] 
                         && typeof(InputValues[0][input]) === "boolean") { // if cache has changed, isn't default, and is a button
 
-                            console.log(`${input} pressed.`);
+                            pawn.PressButton(input);
 
                     } else if (InputValues[0][input] != InputValues[1][input] 
                         && InputValues[0][input] == pawn.GamepadDefaults[input]
                         && typeof(InputValues[0][input]) === "boolean") { // if cache has changed to default, and is a button
 
-                            console.log(`${input} released.`)
+                            pawn.ReleaseButton(input);
 
-                    } else if (InputValues[0][input] != InputValues[1][input] && typeof(InputValues[0][input]) === "number") {
+                    } else if (Math.abs(InputValues[0][input] - InputValues[1][input]) > 0.001
+                        && typeof(InputValues[0][input]) === "number") { // axis value changed
 
-                        console.log(`${input}: ${InputValues[0][input]}`)
+                            pawn.AxisChange(input, InputValues);
 
                     }
                 }
@@ -155,7 +156,8 @@ class WebXRApp {
 
         const AxisHelper = new THREE.AxesHelper(1);
 
-        const ambientLight = new THREE.AmbientLight(0xffffff, 3);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 5);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 2);
 
         const GroundPlane = new THREE.Mesh(
             new THREE.PlaneBufferGeometry(10,10,1,1),
@@ -176,7 +178,7 @@ class WebXRApp {
         BigCube.layers.enable(3);
         GroundPlane.layers.enable(3);
 
-        this.scene.add(AxisHelper, GroundPlane, BigCube, ambientLight);
+        this.scene.add(AxisHelper, GroundPlane, BigCube, ambientLight, directionalLight);
     }
 
 }
