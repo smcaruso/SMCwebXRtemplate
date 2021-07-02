@@ -12,6 +12,7 @@ import {
 	fetchProfile,
 	MotionController
 } from 'three/examples/jsm/libs/motion-controllers.module.js';
+import { keys } from 'lodash';
 
 /*
 	Forked to replace CDN profiles path with local copy for offline testing.
@@ -211,9 +212,10 @@ function addAssetSceneToControllerModel( controllerModel, scene ) {
 
 class XRControllerModelFactory {
 
-	constructor( gltfLoader = null ) {
-
-		this.gltfLoader = gltfLoader;
+	constructor(parentPawn) {
+		
+		this.pawn = parentPawn;
+		this.gltfLoader = this.pawn.app.loaders.gltf;
 		this.path = DEFAULT_PROFILES_PATH;
 		this._assetCache = {};
 
@@ -243,6 +245,9 @@ class XRControllerModelFactory {
 					profile,
 					assetPath
 				);
+
+				this.populateControlMap(profile);
+
 				const cachedAsset = this._assetCache[ controllerModel.motionController.assetUrl ];
 				if ( cachedAsset ) {
 
@@ -292,6 +297,46 @@ class XRControllerModelFactory {
 		} );
 
 		return controllerModel;
+
+	}
+	/*
+		Custom keymap function
+		- SMC 6/21
+	*/
+
+	populateControlMap(profile) {
+
+		if (Object.keys(this.pawn.ControllerMap).length > 0) {
+			return;
+		}
+
+		let keymap = {};
+		Object.values(profile.layouts).forEach(
+			function(layout) {
+				let hand;
+				if (layout.rootNodeName.includes("left")) {
+					keymap.left = {};
+					hand = keymap.left;
+				} else { 
+					keymap.right = {}; 
+					hand = keymap.right;
+				}
+				Object.values(layout.components).forEach(
+					function(component) {
+						Object.keys(component.gamepadIndices).forEach(
+							function(key) {
+								if (key.includes("button")) {
+									hand[component.rootNodeName] = component.gamepadIndices[key];
+								} else {
+									hand[component.rootNodeName + key] = component.gamepadIndices[key];
+								}
+							}
+						)
+
+				});
+		});
+		
+		this.pawn.ControllerMap = keymap;
 
 	}
 

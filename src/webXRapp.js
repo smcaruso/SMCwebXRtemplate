@@ -70,7 +70,7 @@ class WebXRApp {
 
         let pawn = this.VRPawn;
         
-        if (pawn != null && this.renderer.xr.isPresenting && pawn.RightController && pawn.LeftController) {
+        if (this.renderer.xr.isPresenting && pawn.RightController && pawn.LeftController) { // controllers are sorted!
 
             pawn.TraceFromController(pawn.RightController);
             pawn.TraceFromController(pawn.LeftController);
@@ -79,12 +79,40 @@ class WebXRApp {
             if (NavIntersects.length > 0) {
                 pawn.MoveTarget.position.set(NavIntersects[0].point.x,NavIntersects[0].point.y,NavIntersects[0].point.z);
                 pawn.MoveTarget.visible = true;
+                pawn.MoveTarget.material.opacity = pawn.GamepadValues.LGripAxis;
             } else {
                 pawn.MoveTarget.visible = false;
             }
 
+            if (Object.keys(pawn.ControllerMap).length > 0) { // keymap is loaded!
+
+                let InputValues = pawn.CheckControllerInputs();
+
+                if (InputValues.length < 2) { // nullptr protection
+                    return;
+                }
+
+                for (let input in InputValues[0]) {
+                    if (InputValues[0][input] != InputValues[1][input]
+                        && InputValues[0][input] != pawn.GamepadDefaults[input] 
+                        && typeof(InputValues[0][input]) === "boolean") { // if cache has changed, isn't default, and is a button
+
+                            console.log(`${input} pressed.`);
+
+                    } else if (InputValues[0][input] != InputValues[1][input] 
+                        && InputValues[0][input] == pawn.GamepadDefaults[input]
+                        && typeof(InputValues[0][input]) === "boolean") { // if cache has changed to default, and is a button
+
+                            console.log(`${input} released.`)
+
+                    } else if (InputValues[0][input] != InputValues[1][input] && typeof(InputValues[0][input]) === "number") {
+
+                        console.log(`${input}: ${InputValues[0][input]}`)
+
+                    }
+                }
+            }
         }
-        
     }
 
     InitLoaders() {
