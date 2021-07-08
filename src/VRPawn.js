@@ -10,10 +10,14 @@ class VRPawn {
 
         this.PawnRoot = new THREE.Object3D();
         this.PawnRoot.name = "Pawn Root Camera Rig";
-        this.PawnRoot.translateX(app.ViewportCamera.position.x);
-        this.PawnRoot.translateZ(app.ViewportCamera.position.z);
+
+        app.ViewportCamera.add(new THREE.Object3D());
+
+        // this.PawnRoot.translateX(app.ViewportCamera.children[0].position.x);
+        // this.PawnRoot.translateZ(app.ViewportCamera.children[0].position.z);
+        this.PawnRoot.position.copy(app.ViewportCamera.children[0].position);
         this.PawnRoot.add(app.ViewportCamera);
-        
+
         this.Controllers = [];
         this.ControllerMap = {};
         this.RIndex = 0;
@@ -104,20 +108,32 @@ class VRPawn {
         this.MoveTarget.material.blending = THREE.AdditiveBlending;
         this.MoveTarget.name = "Teleport movement target";
         this.MoveTarget.visible = false;
-        this.PawnRoot.attach(this.MoveTarget);
+        this.app.scene.add(this.MoveTarget);
 
     }
 
-    BuildController(index, line){
+    BuildController(index, line, sphere){
         
         const controller = this.app.renderer.xr.getController(index);
         
         controller.userData.selectPressed = false;
         controller.userData.index = index;
+
+        const SelectionSphere = new THREE.Mesh(
+            new THREE.SphereBufferGeometry(0.125, 16, 16),
+            new THREE.MeshBasicMaterial({
+                color: new THREE.Color("rgb(0, 192, 255)"),
+                transparent: true,
+                opacity: 0.0
+            })
+        );
+        SelectionSphere.material.blending = THREE.AdditiveBlending;
+        SelectionSphere.name = "Selection Radius";
         
         if (line) controller.add(line.clone());
-        
-        this.PawnRoot.add(controller);
+        controller.add(SelectionSphere);
+                
+        this.PawnRoot.attach(controller);
         
         let grip;
         
@@ -140,7 +156,7 @@ class VRPawn {
         MotionController.TracingMatrix.identity().extractRotation(MotionController.controller.matrixWorld);
 
         let LinePos = new THREE.Vector3();
-        this.PawnRoot.localToWorld(LinePos)
+        // this.PawnRoot.localToWorld(LinePos)
         LinePos.y -= 0.5;
         LinePos.z -= 1;
     
@@ -348,7 +364,7 @@ class VRPawn {
                 break;
 
             case "RGrip":
-                // console.log("Right grip released");
+                this.RightController.controller.children[1].material.opacity = 0;
                 break;
 
             case "RStick":
@@ -364,7 +380,7 @@ class VRPawn {
                 break;
 
             case "LGrip":
-                // console.log("Left grip released");
+                this.LeftController.controller.children[1].material.opacity = 0;
                 break;
 
             case "LStick":
@@ -372,7 +388,7 @@ class VRPawn {
                 break;
 
             case "LStickTouch":
-                // console.log("Left stick untouched");
+
                 break;
 
         }
@@ -387,9 +403,16 @@ class VRPawn {
                 break;
 
             case "RGripAxis":
+
+                if (this.GamepadValues.RGripAxis > InputCache[1][input]) {
+                    this.RightController.controller.children[1].material.opacity =
+                    0.25 - (this.GamepadValues.RGripAxis * 0.25);
+                }
+
                 break;
 
-            case "RStickXAxis":
+            case "RStickXAxis": // Snap rotation
+
                 if (this.GamepadValues.RStickXAxis > 0.9 && InputCache[1][input] < 0.9) {
                     this.PawnRoot.rotateY(-Math.PI * 0.25);
                 } else if (this.GamepadValues.RStickXAxis < -0.9 && InputCache[1][input] > -0.9) {
@@ -403,12 +426,37 @@ class VRPawn {
                 break;
 
             case "LGripAxis":
+
+                if (this.GamepadValues.LGripAxis > InputCache[1][input]) {
+                    this.LeftController.controller.children[1].material.opacity =
+                        0.25 - (this.GamepadValues.LGripAxis * 0.25);
+                }
+
                 break;
 
             case "LStickXAxis": 
                 break;
 
-            case "LStickYAxis":
+            case "LStickYAxis": // Teleportation
+
+                if (this.GamepadValues.LStickYAxis > 0) {
+                    this.LeftController.controller.children[0].scale.x = this.GamepadValues.LStickYAxis;
+                    this.LeftController.controller.children[0].scale.y = this.GamepadValues.LStickYAxis;
+                    this.LeftController.controller.children[0].scale.z = this.GamepadValues.LStickYAxis;
+                } else {
+                    this.LeftController.controller.children[0].scale.x = 0;
+                    this.LeftController.controller.children[0].scale.y = 0;
+                    this.LeftController.controller.children[0].scale.z = 0;
+                }
+
+                if (this.GamepadValues.LStickYAxis === 0 && !this.GamepadValues.LStickTouch) {
+                    this.PawnRoot.position.set(
+                        this.MoveTarget.position.x,
+                        this.MoveTarget.position.y,
+                        this.MoveTarget.position.z
+                    );
+                }
+
                 break;
 
         }

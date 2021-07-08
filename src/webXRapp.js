@@ -26,10 +26,11 @@ class WebXRApp {
 	}
 	
     Resize() {
+
         this.ViewportCamera.aspect = window.innerWidth / window.innerHeight;
         this.ViewportCamera.updateProjectionMatrix();
-
         this.renderer.setSize( window.innerWidth, window.innerHeight ); 
+
     }
 
     InitThreeScene() {
@@ -69,9 +70,9 @@ class WebXRApp {
         this.OrbitControlSystem.update();
 
         let pawn = this.VRPawn;
-        
-        if (this.renderer.xr.isPresenting && pawn.RightController && pawn.LeftController) { // controllers are sorted!
 
+        if (this.renderer.xr.isPresenting && pawn.RightController && pawn.LeftController) { // controllers are sorted!
+            
             pawn.TraceFromController(pawn.RightController);
             pawn.TraceFromController(pawn.LeftController);
 
