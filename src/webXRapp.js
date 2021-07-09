@@ -9,6 +9,8 @@ class WebXRApp {
     constructor() {
         
         this.CanvasElement = document.querySelector("canvas.webgl");
+
+        // querySelect DOM elements for parsing into 3D UI here
         
         this.WindowSizes = {
             width: window.innerWidth,
