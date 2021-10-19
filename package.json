@@ -13,13 +13,13 @@
   "author": "Steven M. Caruso Design Studio",
   "license": "ISC",
   "devDependencies": {
-    "copy-webpack-plugin": "^8.1.1",
-    "css-loader": "^5.2.4",
-    "html-webpack-plugin": "^5.3.1",
-    "raw-loader": "^4.0.2",
-    "style-loader": "^2.0.0",
-    "webpack": "^5.36.2",
-    "webpack-cli": "^4.7.0",
+    "copy-webpack-plugin": "latest",
+    "css-loader": "latest",
+    "html-webpack-plugin": "latest",
+    "raw-loader": "latest",
+    "style-loader": "latest",
+    "webpack": "latest",
+    "webpack-cli": "latest",
     "webpack-dev-server": "^3.11.2"
   },
   "dependencies": {
@@ -27,7 +27,6 @@
     "@webxr-input-profiles/motion-controllers": "^1.0.0",
     "dat.gui": "^0.7.7",
     "gsap": "^3.6.1",
-    "lodash": "^4.17.21",
     "three": "^0.128.0",
     "three-mesh-ui": "^4.7.3"
   }
